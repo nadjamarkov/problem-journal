@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Problem Journal</title>
+  </head>
+  <body>
+    <h1 id="home-title">The Problem Journal</h1>
+    <h2 id="home-catchphrase">Web app aimed at practicing prolem solving skills</h2>
+    <section id="home-steps">
+      <h3>1. Record the problem</h3>
+      <h3>2. Write down the solution steps</h3>
+      <h3>3. Practice through retreival</h3>
+    </section>
+    <a href = "{{ url_for('demo') }}"><button id="home-demo">DEMO</button></a>
+    <section id="home-registration">
+      <h3>Ready to go?</h3>
+      <a href = "{{ url_for('login') }}"><button id="home-login">log in</button></a>
+      <a href = "{{ url_for('signup') }}"><button id="home-signup">sign up</button></a>
+    </section>
+  </body>
+</html>
