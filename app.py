@@ -7,6 +7,8 @@ from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
 import os
 
+#test
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
