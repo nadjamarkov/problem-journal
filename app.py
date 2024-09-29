@@ -30,6 +30,18 @@ db = SQLAlchemy(app)
 # .tables
 # .exit
 
+# the login manager holds settings needed for logging in
+login_manager = LoginManager()
+# configure it to the application object
+login_manager.init_app(app)
+
+# takes a user_id and returns a User object that's being used in this section
+# user_id gets passed as a string, so we need to convert it to an integer because that's how primary keys
+# are stored in this database
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
 # making the outline of the database (a model) that consists of id, username, and password columns
 class User(db.Model, UserMixin):
   # this column is the row identifier
@@ -76,6 +88,19 @@ def demo():
 def login():
   # passing in the forms
   form = Login_form()
+  # validate_on_submit lets us check if the user clicked the submit button as well as if eve
+  if form.validate_on_submit():
+    # check if the user is in the database
+    user = User.query.filter_by(username = form.username.data).first()
+    # if user is not None
+    if user != None:
+      # checking the hashed thing against the password from the form
+      if bcrypt.check_password_hash(user.password, form.password.data):
+        # log the user in
+        login_user(user)
+        #redirect to the dashboard page
+        return redirect(url_for('dashboard'))
+  
   # adding the form to the html template
   return render_template('login.html', form = form)
 
@@ -95,6 +120,21 @@ def signup():
       return redirect(url_for('login'))
 
     return render_template('signup.html', form = form)
+
+@app.route('/dashboard', methods=['GET','POST'])
+# We can only access this once the user is logged in
+@login_required
+def dashboard():
+  return render_template('dashboard.html')
+
+@app.route('/logout', methods = ['GET', 'POST'])
+# we have to be logged in in order to log out
+@login_required
+def logout():
+  # no need to pass the actual user into logout_user
+  logout_user()
+  # go back to the login page
+  return redirect(url_for('login'))
 
 if __name__ == "__main__":
   app.run(host = '0.0.0.0', debug = True)
