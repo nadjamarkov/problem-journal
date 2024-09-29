@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+    </head>
+    <body>
+        <form method = "POST" action = "">
+            {{form.hidden_tag()}}
+            {{form.old_username}}
+            {{form.old_password}}
+            {{form.new_username}}
+            {{form.new_password}}
+            {{form.submit}}
+        </form>
+        <a href="{{ url_for('dashboard') }}"><button>Dashboard</button></a>
+    </body>
+</html>

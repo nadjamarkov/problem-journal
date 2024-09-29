@@ -10,5 +10,8 @@
             {{form.password}}
             {{form.submit}}
         </form>
+        <a href = "{{ url_for('home') }}"><button id="signup-home-button">home</button></a>
+        <h3 id = "singup-login-h3>">Already have an account? Log in instead!</h3>
+        <a href = "{{ url_for('login') }}"><button id="signup-login-button">log in</button></a>
     </body>
 </html>

@@ -72,6 +72,27 @@ class Signup_form(FlaskForm):
     unique = User.query.filter_by(username = username.data).first()
     if unique != None:
       raise ValidationError("That username has already been taken.")
+    
+# making the outline of the edit account form
+class Editaccount_form(FlaskForm):
+  # old username input to make the user easier to find
+  old_username = StringField(validators = [InputRequired(), Length(min = 3, max = 25)], render_kw={"placeholder":"Old username"})
+  # old password input for security
+  old_password = PasswordField(validators = [InputRequired(), Length(4, 15)], render_kw={"placeholder":"Old password"})
+  # user changes what they want to change
+  new_username = StringField(render_kw={"placeholder":"New username (if applicable)"})
+  new_password = PasswordField(render_kw={"placeholder":"New password (if applicable)"})
+  submit = SubmitField("Change")
+
+  # if there is a mismatch with the old credentials, don't allow changes
+  def credential_mismatch(self, old_username, old_password):
+    user = User.query.filter_by(username = old_username.data).first
+    if user == None:
+      raise ValidationError("Old credentials incorrect.")
+    # check if the hashed password is the same as user input
+    if bcrypt.check_password_hash(user.password, old_password.data) == False:
+      raise ValidationError("Old credentials incorrect.")
+
 
 # defining which pages to return when
 @app.route('/')
@@ -94,7 +115,7 @@ def login():
     user = User.query.filter_by(username = form.username.data).first()
     # if user is not None
     if user != None:
-      # checking the hashed thing against the password from the form
+      # checking the hashed password against the password from the form
       if bcrypt.check_password_hash(user.password, form.password.data):
         # log the user in
         login_user(user)
@@ -135,6 +156,37 @@ def logout():
   logout_user()
   # go back to the login page
   return redirect(url_for('login'))
+
+@app.route('/editaccount', methods = ['GET','POST'])
+@login_required
+def editaccount():
+  form = Editaccount_form()
+
+  if form.validate_on_submit():
+      username = form.old_username.data
+      password = hash_password = bcrypt.generate_password_hash(form.old_password.data)
+      # if the password data is updated, change to this new password
+      if form.new_password.data != None:
+        # check size
+        if(len(form.new_password.data)>=4 and len(form.new_password.data)<=15):
+          hash_password = bcrypt.generate_password_hash(form.new_password.data)
+      # similar if username changes
+      if form.new_username.data != None:
+        # check size
+        if(len(form.new_username.data)>=3 and len(form.new_username.data)<=25):
+          username = form.new_username.data
+      # look up the user in the database
+      user = User.query.filter_by(username = form.old_username.data).first()
+      # if user is not none, update information
+      if user != None:
+        user.username = username
+        user.password = hash_password
+      # commit the changes
+      db.session.commit()
+      #redirect to the dashboard page
+      return redirect(url_for('dashboard'))
+
+  return render_template('editaccount.html', form = form)
 
 if __name__ == "__main__":
   app.run(host = '0.0.0.0', debug = True)
