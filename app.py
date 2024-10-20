@@ -42,7 +42,7 @@ login_manager.init_app(app)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# making the outline of the database (a model) that consists of id, username, and password columns
+# making the outline of the user table in the database that consists of id, username, and password columns
 class User(db.Model, UserMixin):
   # this column is the row identifier
   # not setting the username as the primary key in case the user edits it, it's just not good practice
@@ -51,6 +51,33 @@ class User(db.Model, UserMixin):
   username = db.Column(db.String(30), nullable = False, unique = True)
   # same goes for the password
   password = db.Column(db.String(30), nullable = False)
+
+# making the outline of the model table in the database
+# *************************************FOR THE WRITEUP:********************************************* 
+# I chose to make this a table rather than a separate database because of the clear dependency in the data,
+# namely the problems being related to specific users. There is no need to have access to the problems without
+# having access to the users themselves, so it can be in the same database. There is not that much data either so
+# it makes sense to keep it in the same database.
+class Problem(db.Model):
+  id = db.Column(db.Integer, primary_key = True)
+  # adding a foreign key so I can connect the problems to specific users
+  user_id = db.Column(db.Integer, foreign_key = 'user.id', nullable = False)
+  problem_text = db.Column(db.Text, nullable = False)
+  # store solutions as strings and parse them later based on problem type
+  # *************************************FOR THE WRITEUP:********************************************* 
+  # This makes more sense because it's easier to parse one solution later than to deal with multiple
+  # problem types within a database. This would either require more fields within the table, a complicated
+  # way to address the differences in parsing the solutions, or different tables for each problem type, all
+  # of which seemed wasteful. This is why I decided to stick to having a string.
+  problem_solution = db.Column(db.Text, nullable = False)
+  # *************************************FOR THE WRITEUP:********************************************* 
+  # These two categories seemed to be the most plausible to include within my app because the other ones
+  # are happening at a more subconscious level.
+  problem_define = db.Column(db.Text, nullable = False)
+  problem_encode = db.Column(db.Text, nullable = False)
+  problem_confidence = db.Column(db.Text, nullable = True)
+  problem_difficulty = db.Column(db.Text, nullable = True)
+  problem_mastery = db.Column(db.Text, nullable = True)
 
 # making the outline of the log in form
 class Login_form(FlaskForm):
@@ -92,6 +119,10 @@ class Editaccount_form(FlaskForm):
     # check if the hashed password is the same as user input
     if bcrypt.check_password_hash(user.password, old_password.data) == False:
       raise ValidationError("Old credentials incorrect.")
+
+# making the outline of the
+class Problem_form(FlaskForm):
+
 
 
 # defining which pages to return when
