@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
+from sqlalchemy import ForeignKey
 import os
 
 #test
@@ -61,7 +62,8 @@ class User(db.Model, UserMixin):
 class Problem(db.Model):
   id = db.Column(db.Integer, primary_key = True)
   # adding a foreign key so I can connect the problems to specific users
-  user_id = db.Column(db.Integer, foreign_key = 'user.id', nullable = False)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+  problem_title = db.Column(db.Text, nullable = False)
   problem_text = db.Column(db.Text, nullable = False)
   # store solutions as strings and parse them later based on problem type
   # *************************************FOR THE WRITEUP:********************************************* 
@@ -75,9 +77,13 @@ class Problem(db.Model):
   # are happening at a more subconscious level.
   problem_define = db.Column(db.Text, nullable = False)
   problem_encode = db.Column(db.Text, nullable = False)
-  problem_confidence = db.Column(db.Text, nullable = True)
-  problem_difficulty = db.Column(db.Text, nullable = True)
-  problem_mastery = db.Column(db.Text, nullable = True)
+  # adding confidence and mastery fields for computing these aspects
+  problem_confidence = db.Column(db.Text, default = 0)
+  problem_mastery = db.Column(db.Text, default = 0.0)
+  # explaining the relationship between the user and the problems - the users will have problems assigned
+  # to them. Problems will hold a list of Problem objects associated with the user. Use lazy=True to not
+  # query immediately but rather once the problems are needed.
+  user = db.relationship('User', backref='problems', lazy=True)
 
 # making the outline of the log in form
 class Login_form(FlaskForm):
@@ -120,13 +126,8 @@ class Editaccount_form(FlaskForm):
     if bcrypt.check_password_hash(user.password, old_password.data) == False:
       raise ValidationError("Old credentials incorrect.")
 
-# making the outline of the
-class Problem_form(FlaskForm):
-
-
-
-# defining which pages to return when
-@app.route('/')
+# making the outline of the problem form
+#class Problem_form(FlaskForm):
 
 def home():
   return render_template('home.html')
