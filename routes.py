@@ -1,9 +1,9 @@
 from app import bcrypt
-from flask import render_template, redirect, url_for
-from flask_login import login_user, login_required, logout_user
+from flask import flash, render_template, redirect, url_for
+from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db
-from forms import Login_form, Signup_form, Editaccount_form
-from models import User
+from forms import Login_form, Signup_form, Editaccount_form, Record_form
+from models import User, Problem
 
 @app.route('/')
 
@@ -97,3 +97,36 @@ def editaccount():
       return redirect(url_for('dashboard'))
 
   return render_template('editaccount.html', form = form)
+
+@app.route('/record', methods = ['GET', 'POST'])
+@login_required
+def record():
+  # access the record form
+  form = Record_form()
+
+  # iterate through all of the folders that already exist and present them as options
+  #folder_choices = []
+  #for folder in current_user.folders:
+    #folder_choices.append((folder.id, folder.name))
+  #form.old_folder.choices = folder_choices
+
+  if form.validate_on_submit():
+    # check if the user added a new folder
+    #if form.new_folder.data:
+      #new_folder = Folder(name = form.new_folder.data, user_id = current_user.id)
+      #db.session.add(new_folder)
+      # use flush to add this immediately and not wait to close file
+      #db.session.flush()
+      # set the new problem
+      #new_problem = Problem(problem_title = form.problem_title.data, problem_text = form.problem_text.data, problem_type = form.problem_type.data, problem_define = form.problem_define.data, problem_encode = form.problem_encode.data, problem_solution = form.problem_solution.data, folder_id = new_folder.id, user_id = current_user.id)
+      # add the new problem to the database
+      #db.session.add(new_problem)
+    # otherwise add to the folder that the user wanted to add it to
+    #else:
+    new_problem = Problem(problem_title = form.problem_title.data, problem_text = form.problem_text.data, problem_type = form.problem_type.data, problem_define = form.problem_define.data, problem_encode = form.problem_encode.data, problem_solution = form.problem_solution.data, user_id = current_user.id)
+    db.session.add(new_problem)
+    
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
+  return render_template('record.html', form = form)

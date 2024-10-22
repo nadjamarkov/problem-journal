@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import InputRequired, Length, ValidationError
-from models import User
+from models import User, Problem
 from app import bcrypt
 
 # making the outline of the log in form
@@ -46,4 +46,29 @@ class Editaccount_form(FlaskForm):
       raise ValidationError("Old credentials incorrect.")
 
 # making the outline of the problem form
-#class Problem_form(FlaskForm):
+class Record_form(FlaskForm):
+  problem_title = StringField(validators = [InputRequired(), Length(min=3, max=50)], render_kw={"placeholder":"Problem title"})
+  problem_text = StringField(validators = [InputRequired()], render_kw={"placeholder":"Problem text"})
+  # select problem type out of the given options
+  problem_type = SelectField("Problem type", choices=[('Algebra','Algebra')])
+  # write out the define step of the problem
+  problem_define = StringField(validators = [InputRequired()], render_kw={"placeholder":"Step 1: define"})
+  problem_encode = StringField(validators = [InputRequired()], render_kw={"placeholder":"Step 2: encode"})
+  problem_solution = StringField(validators = [InputRequired()], render_kw={"placeholder":"Solution"})
+  # choose folder from a list of already existing  ones
+  # old_folder = SelectField("Choose folder")
+  # or create a new folder
+  # new_folder = StringField(render_kw={"placeholder":"Or create a new folder"})
+  submit = SubmitField("Add problem")
+
+  # problem titles have to be unique
+  def unique_problem_title(self, problem_title):
+    unique = Problem.query.filter_by(problem_title = problem_title.data).first()
+    if unique != None:
+      raise ValidationError("That problem title has already been taken.")
+
+  # folder names have to be unique  
+  #def unique_folder_name(self, new_folder):
+    #unique = Folder.query.filter_by(name = new_folder.data).first()
+    #if unique != None:
+      #raise ValidationError("That folder name has already been taken.")
