@@ -3,7 +3,7 @@ from flask import flash, render_template, redirect, url_for
 from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db
 from forms import Login_form, Signup_form, Editaccount_form, Record_form
-from models import User, Problem
+from models import User, Problem, Folder
 
 @app.route('/')
 
@@ -40,6 +40,8 @@ def signup():
     form = Signup_form()
 
     if form.validate_on_submit():
+      print("VALID!!!")
+      print(form.errors)
       # hashing to make the sign up process secure
       hash_password = bcrypt.generate_password_hash(form.password.data)
       new_user = User(username = form.username.data, password = hash_password)
@@ -49,8 +51,11 @@ def signup():
       db.session.commit()
       #redirect to the login page
       return redirect(url_for('login'))
-
-    return render_template('signup.html', form = form)
+    
+    else:
+      print("HERE")
+      print(form.errors)
+      return render_template('signup.html', form = form)
 
 @app.route('/dashboard', methods=['GET','POST'])
 # We can only access this once the user is logged in
@@ -103,30 +108,27 @@ def editaccount():
 def record():
   # access the record form
   form = Record_form()
-
-  # iterate through all of the folders that already exist and present them as options
-  #folder_choices = []
-  #for folder in current_user.folders:
-    #folder_choices.append((folder.id, folder.name))
-  #form.old_folder.choices = folder_choices
+  # put all the folder choices into the form
+  form.old_folder.choices = Record_form.populate_folders(current_user.id)
 
   if form.validate_on_submit():
+    # variable for saving the folder id in case of a new folder
+    folder_id = None
     # check if the user added a new folder
-    #if form.new_folder.data:
-      #new_folder = Folder(name = form.new_folder.data, user_id = current_user.id)
-      #db.session.add(new_folder)
-      # use flush to add this immediately and not wait to close file
-      #db.session.flush()
-      # set the new problem
-      #new_problem = Problem(problem_title = form.problem_title.data, problem_text = form.problem_text.data, problem_type = form.problem_type.data, problem_define = form.problem_define.data, problem_encode = form.problem_encode.data, problem_solution = form.problem_solution.data, folder_id = new_folder.id, user_id = current_user.id)
-      # add the new problem to the database
-      #db.session.add(new_problem)
-    # otherwise add to the folder that the user wanted to add it to
-    #else:
-    new_problem = Problem(problem_title = form.problem_title.data, problem_text = form.problem_text.data, problem_type = form.problem_type.data, problem_define = form.problem_define.data, problem_encode = form.problem_encode.data, problem_solution = form.problem_solution.data, user_id = current_user.id)
+    if form.new_folder.data:
+        new_folder = Folder(name=new_folder.data, user_id=current_user.id)
+        db.session.add(new_folder)
+        db.session.commit()
+        folder_id = new_folder.id
+    # otherwise the user wants to use one of the old folders
+    else:
+      folder_id = form.old_folder.data
+
+    # add the problem to the database
+    new_problem = Problem(problem_title = form.problem_title.data, problem_text = form.problem_text.data, problem_type = form.problem_type.data, problem_define = form.problem_define.data, problem_encode = form.problem_encode.data, problem_solution = form.problem_solution.data, user_id = current_user.id, folder_id = folder_id)
     db.session.add(new_problem)
-    
     db.session.commit()
+
     return redirect(url_for('dashboard'))
 
   return render_template('record.html', form = form)

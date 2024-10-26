@@ -12,7 +12,7 @@ class User(db.Model, UserMixin):
   # same goes for the password
   password = db.Column(db.String(30), nullable = False)
   # creating a relationship between the user and the folders
-  #folders = db.relationship('Folder', backref='user', lazy=True)
+  folders = db.relationship('Folder', backref='user', lazy=True)
   # creating a relationship between the user and the problems
   problems = db.relationship('Problem', backref='user', lazy = True)
 
@@ -22,18 +22,18 @@ class User(db.Model, UserMixin):
 # part to get me more comfortable with using databases, as I haven't built any database models before.
 # On the other hand, it's also useful within the app as it gives me more functionality within it.
 # Folders are connected to specific users and hold specific problems within them.
-#class Folder(db.Model):
-  #id = db.Column(db.Integer, primary_key = True)
+class Folder(db.Model):
+  id = db.Column(db.Integer, primary_key = True)
   # adding a foreign key to connect the folders to specific users
-  #user_id = db.Column(db.Integer, ForeignKey('user.id'), nullable = False)
+  user_id = db.Column(db.Integer, ForeignKey('user.id'), nullable = False)
   # adding the name of the folder as a parameter
-  #name = db.Column(db.Text, nullable = False)
+  name = db.Column(db.Text, nullable = False)
   # folder mastery parameter, initially zero
-  #folder_mastery = db.Column(db.Float, default = 0.0)
+  folder_mastery = db.Column(db.Float, default = 0.0)
   # the folders will have problems assigned to them. Folders will hold a list of Problem objects associated with the user. 
   # Use lazy=True to not query immediately but rather once the problems are needed. Backref creates a reverse relationship,
   # so both folder.problems and problem.folder are available
-  #problems = db.relationship('Problem', backref='folder', lazy=True) 
+  problems = db.relationship('Problem', backref='folder', lazy=True) 
 
 # making the outline of the Problem table in the database
 # *************************************FOR THE WRITEUP:********************************************* 
@@ -46,7 +46,7 @@ class Problem(db.Model):
   # adding a foreign key so I can connect the problems to specific users
   user_id = db.Column(db.Integer, ForeignKey('user.id'), nullable = False)
   # adding another foreign key so I can connect the problems to specific folders
-  #folder_id = db.Column(db.Integer, ForeignKey('folder.id'), nullable = False)
+  folder_id = db.Column(db.Integer, ForeignKey('folder.id'), nullable = False)
   problem_title = db.Column(db.Text, nullable = False)
   problem_text = db.Column(db.Text, nullable = False)
   # store solutions as strings and parse them later based on problem type

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import InputRequired, Length, ValidationError
-from models import User, Problem
+from models import User, Problem, Folder
 from app import bcrypt
 
 # making the outline of the log in form
@@ -14,16 +14,18 @@ class Login_form(FlaskForm):
 
 # making the outline of the sign up form
 class Signup_form(FlaskForm):
-  username = StringField(validators = [InputRequired(), Length(min = 3, max = 25)], render_kw={"placeholder":"Username"})
-  password = PasswordField(validators = [InputRequired(), Length(4, 15)], render_kw={"placeholder":"Password"})
-  submit = SubmitField("Sign Up")
-
+  # making sure the username is unique
   def unique_username(self, username):
     # .query is querying the User model, and then it applies a filter that finds if any username field (username) is equal to the
     # data from the WTF form (username.data) and retrieving the first instance of this or None if nothing matches
     unique = User.query.filter_by(username = username.data).first()
     if unique != None:
+      print("Username already taken.")
       raise ValidationError("That username has already been taken.")
+    print("Username is unique.")
+  username = StringField(validators = [InputRequired(), Length(min = 3, max = 25), unique_username], render_kw={"placeholder":"Username"})
+  password = PasswordField(validators = [InputRequired(), Length(4, 15)], render_kw={"placeholder":"Password"})
+  submit = SubmitField("Sign Up")
     
 # making the outline of the edit account form
 class Editaccount_form(FlaskForm):
@@ -56,19 +58,29 @@ class Record_form(FlaskForm):
   problem_encode = StringField(validators = [InputRequired()], render_kw={"placeholder":"Step 2: encode"})
   problem_solution = StringField(validators = [InputRequired()], render_kw={"placeholder":"Solution"})
   # choose folder from a list of already existing  ones
-  # old_folder = SelectField("Choose folder")
+  old_folder = SelectField("Choose folder", choices=[])
   # or create a new folder
-  # new_folder = StringField(render_kw={"placeholder":"Or create a new folder"})
+  new_folder = StringField(render_kw={"placeholder":"Or create a new folder"})
+  
+  # submit the form
   submit = SubmitField("Add problem")
 
   # problem titles have to be unique
-  def unique_problem_title(self, problem_title):
+  def validate_problem_title(self, problem_title):
     unique = Problem.query.filter_by(problem_title = problem_title.data).first()
     if unique != None:
       raise ValidationError("That problem title has already been taken.")
 
-  # folder names have to be unique  
-  #def unique_folder_name(self, new_folder):
-    #unique = Folder.query.filter_by(name = new_folder.data).first()
-    #if unique != None:
-      #raise ValidationError("That folder name has already been taken.")
+  # folder names have to be unique
+  def validate_new_folder(self, folder_name):
+    unique = Problem.query.filter_by(folder_name = folder_name.data).first()
+    if unique != None:
+      raise ValidationError("That folder name has already been taken.")
+
+  # method to populate the StringField with folders that already exist for the user
+  @classmethod
+  def populate_folders(cls, user_id):
+      if user_id:
+          user_folders = Folder.query.filter_by(user_id=user_id).all()
+          return [(folder.id, folder.name) for folder in user_folders]
+      return []
