@@ -1,0 +1,36 @@
+<html>
+<head>
+    <script>
+        function show_problem_title(folder_id) {
+            const problemsDiv = document.getElementById(`problems-${folder_id}`);
+            problemsDiv.style.display = problemsDiv.style.display === 'none' ? 'block' : 'none';
+        }
+        function show_problem_description(problem_id) {
+            const problemsDiv = document.getElementById(`description-${problem_id}`);
+            problemsDiv.style.display = problemsDiv.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</head>
+<body>
+    <ul class="folders">
+        {% for folder in folders %}
+        <!--Display folder names-->
+            <li>{{ folder.name }}</li>
+            <!--Make problems visible by clicking on see problems-->
+            <button onclick="show_problem_title('{{ folder.id }}')">See problems</button>
+            <ul class="problems" id="problems-{{ folder.id }}" style="display: none;">
+            {% for problem in folder.problems %}
+                <li onclick="show_problem_description('{{ problem.id }}')">{{ problem.problem_title }}</li>
+                <ul class="problems-description" id="description-{{ problem.id }}" style="display: none;">
+                    <li>Text: {{ problem.problem_text }}</li>
+                    <li>Define step: {{ problem.problem_define }}</li>
+                    <li>Encode step: {{ problem.problem_encode }}</li>
+                    <li>Solution: {{ problem.problem_solution }}</li>
+                </ul>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    </ul>
+    <a href = "{{ url_for('dashboard') }}"><button id="dashboard-home-button">Dashboard</button></a>
+</body>
+</html>

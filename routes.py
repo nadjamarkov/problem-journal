@@ -4,6 +4,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db
 from forms import Login_form, Signup_form, Editaccount_form, Record_form
 from models import User, Problem, Folder
+from wtforms import ValidationError
 
 @app.route('/')
 
@@ -52,10 +53,7 @@ def signup():
       #redirect to the login page
       return redirect(url_for('login'))
     
-    else:
-      print("HERE")
-      print(form.errors)
-      return render_template('signup.html', form = form)
+    return render_template('signup.html', form = form) 
 
 @app.route('/dashboard', methods=['GET','POST'])
 # We can only access this once the user is logged in
@@ -116,19 +114,33 @@ def record():
     folder_id = None
     # check if the user added a new folder
     if form.new_folder.data:
-        new_folder = Folder(name=new_folder.data, user_id=current_user.id)
-        db.session.add(new_folder)
-        db.session.commit()
-        folder_id = new_folder.id
+      new_folder = Folder(name=form.new_folder.data, user_id=current_user.id)
+      db.session.add(new_folder)
+      db.session.commit()
+      folder_id = new_folder.id
     # otherwise the user wants to use one of the old folders
     else:
       folder_id = form.old_folder.data
 
     # add the problem to the database
     new_problem = Problem(problem_title = form.problem_title.data, problem_text = form.problem_text.data, problem_type = form.problem_type.data, problem_define = form.problem_define.data, problem_encode = form.problem_encode.data, problem_solution = form.problem_solution.data, user_id = current_user.id, folder_id = folder_id)
+
     db.session.add(new_problem)
     db.session.commit()
 
-    return redirect(url_for('dashboard'))
+    # update the mastery of the folder the new problem is in
+    folder = Folder.query.filter_by(id=folder_id).first()
+    folder.folder_mastery += new_problem.problem_mastery
 
+    return redirect(url_for('dashboard'))
+  
   return render_template('record.html', form = form)
+
+  
+@app.route('/retrieve', methods = ['GET','POST'])
+@login_required
+def retrieve():
+  # show all of the folders
+  folders = Folder.query.all()
+
+  return render_template('retrieve.html', folders=folders)

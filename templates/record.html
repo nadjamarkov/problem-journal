@@ -4,25 +4,72 @@
 
     </head>
     <body>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <ul>
-          {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-          {% endfor %}
-          </ul>
-        {% endif %}
-      {% endwith %}
         <form method = "POST" action = "">
             {{form.hidden_tag()}}
-            {{form.problem_title}}
-            {{form.problem_text}}
-            {{form.problem_type}}
-            {{form.problem_define}}
-            {{form.problem_encode}}
-            {{form.problem_solution}}
-            {{form.old_folder}}
-            {{form.new_folder}}
+            <div>
+              {{form.problem_title}}
+              <ul class="errors">
+                {% for error in form.problem_title.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.problem_text}}
+              <ul class="errors">
+                {% for error in form.problem_text.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.problem_type}}
+              <ul class="errors">
+                {% for error in form.problem_type.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.problem_define}}
+              <ul class="errors">
+                {% for error in form.problem_define.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.problem_encode}}
+              <ul class="errors">
+                {% for error in form.problem_encode.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.problem_solution}}
+              <ul class="errors">
+                {% for error in form.problem_solution.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.old_folder}}
+              <ul class="errors">
+                {% for error in form.old_folder.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
+            <div>
+              {{form.new_folder}}
+              <ul class="errors">
+                {% for error in form.new_folder.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+            </div>
             {{form.submit}}
         </form>
         <a href="{{ url_for('dashboard') }}"><button>Dashboard</button></a>

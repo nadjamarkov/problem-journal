@@ -6,8 +6,22 @@
 <body>
     <form method = "POST" action = "">
         {{form.hidden_tag()}}
-        {{form.username}}
-        {{form.password}}
+        <div>
+            {{form.username}}
+            <ul class="errors">
+                {% for error in form.username.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+        </div>
+        <div>
+            {{form.password}}
+            <ul class="errors">
+                {% for error in form.password.errors %}
+                    <li>{{ error }}</li>  <!-- Display each error -->
+                {% endfor %}
+            </ul>
+        </div>
         {{form.submit}}
     </form>
     <a href = "{{ url_for('home') }}"><button id="login-home-button">home</button></a>

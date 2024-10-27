@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField
-from wtforms.validators import InputRequired, Length, ValidationError
+from wtforms.validators import InputRequired, Length, ValidationError, Optional
 from models import User, Problem, Folder
 from app import bcrypt
 
@@ -15,15 +15,13 @@ class Login_form(FlaskForm):
 # making the outline of the sign up form
 class Signup_form(FlaskForm):
   # making sure the username is unique
-  def unique_username(self, username):
+  def validate_username(self, username):
     # .query is querying the User model, and then it applies a filter that finds if any username field (username) is equal to the
     # data from the WTF form (username.data) and retrieving the first instance of this or None if nothing matches
     unique = User.query.filter_by(username = username.data).first()
     if unique != None:
-      print("Username already taken.")
       raise ValidationError("That username has already been taken.")
-    print("Username is unique.")
-  username = StringField(validators = [InputRequired(), Length(min = 3, max = 25), unique_username], render_kw={"placeholder":"Username"})
+  username = StringField(validators = [InputRequired(), Length(min = 3, max = 25)], render_kw={"placeholder":"Username"})
   password = PasswordField(validators = [InputRequired(), Length(4, 15)], render_kw={"placeholder":"Password"})
   submit = SubmitField("Sign Up")
     
@@ -39,12 +37,12 @@ class Editaccount_form(FlaskForm):
   submit = SubmitField("Change")
 
   # if there is a mismatch with the old credentials, don't allow changes
-  def credential_mismatch(self, old_username, old_password):
-    user = User.query.filter_by(username = old_username.data).first
+  def validate_old_username(self, old_username):
+    user = User.query.filter_by(username = old_username.data).first()
     if user == None:
       raise ValidationError("Old credentials incorrect.")
     # check if the hashed password is the same as user input
-    if bcrypt.check_password_hash(user.password, old_password.data) == False:
+    if bcrypt.check_password_hash(user.password, self.old_password.data) == False:
       raise ValidationError("Old credentials incorrect.")
 
 # making the outline of the problem form
@@ -73,14 +71,20 @@ class Record_form(FlaskForm):
 
   # folder names have to be unique
   def validate_new_folder(self, folder_name):
-    unique = Problem.query.filter_by(folder_name = folder_name.data).first()
+    unique = Folder.query.filter_by(name = folder_name.data).first()
     if unique != None:
       raise ValidationError("That folder name has already been taken.")
+
+  def validate_folder_selection(self):
+    if self.old_folder.data == 'New Folder' and self.new_folder.data == None:
+      raise ValidationError("You have to choose a folder or create a new one")
 
   # method to populate the StringField with folders that already exist for the user
   @classmethod
   def populate_folders(cls, user_id):
-      if user_id:
-          user_folders = Folder.query.filter_by(user_id=user_id).all()
-          return [(folder.id, folder.name) for folder in user_folders]
-      return []
+    folder_list = [('New Folder','New Folder')]
+    if user_id:
+        user_folders = Folder.query.filter_by(user_id=user_id).all()
+        for folder in user_folders:
+          folder_list.append((folder.id, folder.name))
+    return folder_list
