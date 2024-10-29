@@ -1,5 +1,5 @@
 from app import bcrypt
-from flask import flash, render_template, redirect, url_for
+from flask import flash, render_template, redirect, url_for, jsonify
 from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db
 from forms import Login_form, Signup_form, Editaccount_form, Record_form
@@ -144,3 +144,17 @@ def retrieve():
   folders = Folder.query.all()
 
   return render_template('retrieve.html', folders=folders)
+
+# Create a dictionary to hold the folder and problems
+@app.route('/api/folders/<int:folder_id>', methods=['GET'])
+def get_folder(folder_id):
+    folder = Folder.query.get(folder_id)
+    if folder:
+        folder_data = {
+            'id': folder.id,
+            'mastery': folder.folder_mastery,
+            'problems': [{'id': problem.id, 'title': problem.problem_title, 'text': problem.problem_text, 'solution': problem.problem_solution, 'define':problem.problem_define, 'encode':problem.problem_encode, 'mastery':problem.problem_mastery} for problem in folder.problems]
+        }
+        return jsonify(folder_data)
+    else:
+        return jsonify({'error': 'Folder not found'}), 404
