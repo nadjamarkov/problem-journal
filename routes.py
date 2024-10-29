@@ -1,5 +1,5 @@
 from app import bcrypt
-from flask import flash, render_template, redirect, url_for, jsonify
+from flask import flash, render_template, redirect, url_for, jsonify, request
 from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db
 from forms import Login_form, Signup_form, Editaccount_form, Record_form
@@ -158,3 +158,26 @@ def get_folder(folder_id):
         return jsonify(folder_data)
     else:
         return jsonify({'error': 'Folder not found'}), 404
+    
+# used for updating problem mastery when requested 
+@app.route('/api/problems/<int:problem_id>/mastery', methods=['PATCH'])
+def update_problem_mastery(problem_id, increase):
+    data = request.get_json()
+    increase = data.get('increase')
+    problem = Problem.query.get(problem_id)
+    if problem:
+        if increase:
+          problem.problem_mastery = problem.problem_mastery + 0.3
+        else:
+          problem.problem_mastery = problem.problem_mastery - 0.3
+        
+        if problem.problem_mastery > 1:
+           problem.problem_mastery = 1
+        if problem.problem_mastery < 0:
+           problem.problem_mastery = 0
+
+        db.session.commit()
+
+        return jsonify({'message': 'Problem mastery updated successfully.'}), 200
+    else:
+        return jsonify({'error': 'Problem not found'}), 404

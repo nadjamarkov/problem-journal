@@ -2,125 +2,146 @@
 <head>
     <script>
         // function for determining when to show problem titles
-        function show_problem_title(folder_id) {
-            const problemsDiv = document.getElementById(`problems-${folder_id}`);
-            problemsDiv.style.display = problemsDiv.style.display === 'none' ? 'block' : 'none';
-        }
+function show_problem_title(folder_id) {
+    const problemsDiv = document.getElementById(`problems-${folder_id}`);
+    problemsDiv.style.display = problemsDiv.style.display === 'none' ? 'block' : 'none';
+}
 
-        // function for determining when to show problem descriptions
-        function show_problem_description(problem_id) {
-            const problemsDiv = document.getElementById(`description-${problem_id}`);
-            problemsDiv.style.display = problemsDiv.style.display === 'none' ? 'block' : 'none';
-        }
+// function for determining when to show problem descriptions
+function show_problem_description(problem_id) {
+    const problemsDiv = document.getElementById(`description-${problem_id}`);
+    problemsDiv.style.display = problemsDiv.style.display === 'none' ? 'block' : 'none';
+}
 
-        // logic for practice mode within folders
-        let problem_index = 0
-        let problems = []
-        let help = 0
+// logic for practice mode within folders
+let problem_index = 0
+let problems = []
+let help = 0
 
-        function practice_mode_folder(folder_id) {
-            fetch(`/api/folders/${folder_id}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("Fetched data:", data);
+function practice_mode_folder(folder_id) {
+    fetch(`/api/folders/${folder_id}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
+            console.log("Fetched data:", data);
 
-                    // folder object
-                    const folder = data;
-                    // problem dictionary, use slice to create a copy
-                    problems = folder.problems.slice();
+            // folder object
+            const folder = data;
+            // problem dictionary, use slice to create a copy
+            problems = folder.problems.slice();
             
-                    console.log("Folder:", folder);
-                    console.log("Problems:", problems);
+            console.log("Folder:", folder);
+            console.log("Problems:", problems);
 
-                    // if the mastery is less than 0.5, use interleaved
-                    if(folder.mastery > 0.5){
-                        problems = folder.problems.sort(() => Math.random() - 0.5);
-                    }
+            // if the mastery is less than 0.5, use interleaved
+            if(folder.mastery > 0.5){
+                problems = folder.problems.sort(() => Math.random() - 0.5);
+            }
             
-                    // make it show up on the page and hide the actual problems
-                    document.getElementById(`practice-${folder_id}`).style.display = 'block';
-                    document.getElementById(`show-problems-div`).style.display = 'none';
-                    document.getElementById(`practice-button`).style.display = 'none';
-                    display_problems(problem_index);
+            // make it show up on the page and hide the actual problems
+            document.getElementById(`practice-${folder_id}`).style.display = 'block';
+            document.getElementById(`show-problems-div`).style.display = 'none';
+            document.getElementById(`practice-button`).style.display = 'none';
+            display_problems(problem_index);
             
-                })
-                .catch(error => {
-                    console.error("Error fetching folder:", error);
-                });
+        })
+        .catch(error => {
+            console.error("Error fetching folder:", error);
+        });
+}
+
+// logic for switching from problem to problem
+function display_problems(problem_index){
+    const problemDiv = document.getElementById('current-problem');
+    // show the problems
+    if(problem_index < problems.length){
+        const problem = problems[problem_index];
+        problemDiv.innerHTML = `
+        <h3>${problem.title}</h3>
+        <p>${problem.text}</p>`;
+        help = 0;
+        document.getElementById(`problem-submit-button`).style.display = 'block';
+        document.getElementById(`user-answer`).style.display = 'block';
+    }else { // or state you're at the end
+        problemDiv.innerHTML = '<p>End of problems.</p>';
+    }
+}
+
+// logic for submitting the answer
+function submit_answer(){
+    const answer = document.getElementById('user-answer').value;
+
+    console.log("Current problem index:", problem_index);
+    console.log("Problems array length:", problems.length);
+
+    // Check if the user's answer matches the correct answer, and if it does move on to the next problem
+    if (answer.trim().toLowerCase() === problems[problem_index].solution.trim().toLowerCase()) {
+        alert("Correct!");
+        update_problem
+        problem_index++;
+        display_problems(problem_index)
+    } else {
+        alert("Incorrect.");
+        help++;
+        display_hints(problem_index)
+    }
+}
+
+// function for displaying hints if the user is struggling
+function display_hints(problem_index) {
+    const problemDiv = document.getElementById('current-problem');
+    const problem = problems[problem_index];
+
+    let hint = '';
+    if (help === 1) {
+        hint = `<p>Define step: ${problem.define}</p>`;
+    } else if (help === 2) {
+        hint = `<p>Encode step: ${problem.encode}</p>`;
+    } else {
+        hint = `<p>Solution: ${problem.solution}</p>`;
+        document.getElementById(`problem-submit-button`).style.display = 'none';
+        document.getElementById(`user-answer`).style.display = 'none';
+        hint += `<div><button onclick="move_on()">Move On</button></div>`
+    }
+
+    problemDiv.innerHTML += hint;
+}
+
+// function for going to the next problem if the user couldn't solve it
+function move_on(){
+    problem_index++;
+    display_problems(problem_index)
+}
+
+// function for leaving the practice mode
+function leave_practice(folder_id){
+    document.getElementById(`practice-${folder_id}`).style.display = 'none';
+    document.getElementById(`show-problems-div`).style.display = 'block';
+    document.getElementById(`practice-button`).style.display = 'block';
+}
+
+// function for updating problem mastery
+function update_problem_mastery(problem_id, increase) {
+    fetch(`/api/problems/${problem_id}/mastery`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            increase: increase
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.error("Error updating mastery:", response);
         }
-
-        // logic for switching from problem to problem
-        function display_problems(problem_index){
-            const problemDiv = document.getElementById('current-problem');
-            // show the problems
-            if(problem_index < problems.length){
-                const problem = problems[problem_index];
-                problemDiv.innerHTML = `
-                <h3>${problem.title}</h3>
-                <p>${problem.text}</p>`;
-                help = 0;
-                document.getElementById(`problem-submit-button`).style.display = 'block';
-                document.getElementById(`user-answer`).style.display = 'block';
-            }else { // or state you're at the end
-                problemDiv.innerHTML = '<p>End of problems.</p>';
-            }
-        }
-
-        // logic for submitting the answer
-        function submit_answer(){
-            const answer = document.getElementById('user-answer').value;
-
-            console.log("Current problem index:", problem_index);
-            console.log("Problems array length:", problems.length);
-
-            // Check if the user's answer matches the correct answer, and if it does move on to the next problem
-            if (answer.trim().toLowerCase() === problems[problem_index].solution.trim().toLowerCase()) {
-                alert("Correct!");
-                problem_index++;
-                display_problems(problem_index)
-            } else {
-                alert("Incorrect.");
-                help++;
-                display_hints(problem_index)
-            }
-        }
-
-        // function for displaying hints if the user is struggling
-        function display_hints(problem_index) {
-            const problemDiv = document.getElementById('current-problem');
-            const problem = problems[problem_index];
-
-            let hint = '';
-            if (help === 1) {
-                hint = `<p>Define step: ${problem.define}</p>`;
-            } else if (help === 2) {
-                hint = `<p>Encode step: ${problem.encode}</p>`;
-            } else {
-                hint = `<p>Solution: ${problem.solution}</p>`;
-                document.getElementById(`problem-submit-button`).style.display = 'none';
-                document.getElementById(`user-answer`).style.display = 'none';
-                hint += `<div><button onclick="move_on()">Move On</button></div>`
-            }
-
-            problemDiv.innerHTML += hint;
-        }
-
-        // function for going to the next problem if the user couldn't solve it
-        function move_on(){
-            problem_index++;
-            display_problems(problem_index)
-        }
-
-        // function for leaving the practice mode
-        function leave_practice(folder_id){
-            document.getElementById(`practice-${folder_id}`).style.display = 'none';
-            document.getElementById(`show-problems-div`).style.display = 'block';
-            document.getElementById(`practice-button`).style.display = 'block';
-        }
-
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}
     </script>
 </head>
 <body>
