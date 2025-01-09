@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-
+      <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     </head>
     <body>
+      <h3>This is the place to record your problems! Here's a bit of clarification: </h3>
+      <h3>Define step: Think about the problem you're trying to solve. What are you looking for? If you're solving an algebra problem, write down if you're looking for an Expression, Equation, or Number. If you're solving a regular expression problem, write down Expression or Text.</h3>
+      <h3>Encode step: Write down the variables that were given to you! For algebra, think about the variables you're using to solve your problem and separate them with a comma. For regular expressions, write down the text want to write a regular expression for, or a regular expression for which you want to write the text as a solution.</h3>
         <form method = "POST" action = "">
             {{form.hidden_tag()}}
             <div>

@@ -1,0 +1,120 @@
+/* General Layout */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Headers and Titles */
+h1, h2, h3 {
+    text-align: center;
+    color: #333;
+}
+
+/* Buttons */
+button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Form Styles */
+form {
+    margin: 20px auto;
+    max-width: 500px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+div {
+    margin-bottom: 20px;
+}
+
+/* Input Fields */
+input[type="text"], input[type="password"], textarea, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+    border-color: #007bff;
+}
+
+/* Error Messages */
+ul.errors {
+    padding-left: 20px;
+    color: red;
+}
+
+ul.errors li {
+    font-size: 14px;
+}
+
+/* Links */
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Home Page */
+#home-title-h1, #home-catchphrase-h2 {
+    text-align: center;
+    color: #333;
+}
+
+#home-steps-section {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#home-steps-section h3 {
+    font-size: 18px;
+}
+
+#home-registration {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Dashboard and other buttons */
+#dashboard-home-button, #practice-button, #leave-practice-button, #algebra-button, #regex-button, #signup-home-button, #signup-login-button, #login-home-button, #login-signup-button {
+    width: 100%;
+}
+
+ul.folders, ul.problems {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ul.folders li, ul.problems li {
+    font-size: 18px;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+ul.folders li:hover, ul.problems li:hover {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}

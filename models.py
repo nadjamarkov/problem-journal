@@ -1,6 +1,7 @@
 from app import db
 from flask_login import UserMixin
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, DateTime
+from datetime import datetime, timezone
 
 # making the outline of the user table in the database that consists of id, username, and password columns
 class User(db.Model, UserMixin):
@@ -22,12 +23,18 @@ class User(db.Model, UserMixin):
 # part to get me more comfortable with using databases, as I haven't built any database models before.
 # On the other hand, it's also useful within the app as it gives me more functionality within it.
 # Folders are connected to specific users and hold specific problems within them.
+# This feature was updated to reflect certain problem subtypes because the folders in and of themselves
+# didn't serve much of a purpose in my app, so I chose to use them for this purpose. Instead of combining
+# several algebra questions of different types and several regular expression questions, the folders now 
+# have a specific problem subtype (algebraic functions, e-mail address regular expressions, etc.)
 class Folder(db.Model):
   id = db.Column(db.Integer, primary_key = True)
   # adding a foreign key to connect the folders to specific users
   user_id = db.Column(db.Integer, ForeignKey('user.id'), nullable = False)
   # adding the name of the folder as a parameter
   name = db.Column(db.Text, nullable = False)
+  # type of problems that are stored in folder (algebra vs regular expressions)
+  folder_type = db.Column(db.String(30), nullable = False)
   # folder mastery parameter, initially zero
   folder_mastery = db.Column(db.Float, default = 0.0)
   # the folders will have problems assigned to them. Folders will hold a list of Problem objects associated with the user. 
@@ -66,3 +73,8 @@ class Problem(db.Model):
   problem_mastery = db.Column(db.Float, default = 0.0)
   # save the specific problem type the user is inputing (algebra, graph, etc.)
   problem_type = db.Column(db.Text, nullable = False)
+  # save the timestamp when the problem was last practiced
+  last_practiced = db.Column(db.DateTime(timezone = True), default=datetime.now(timezone.utc), nullable = False)
+  # save the timestamp when the mastery of the problem was last updated
+  last_updated = db.Column(db.DateTime(timezone = True), default=datetime.now(timezone.utc), nullable = False)
+

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Problem Journal</title>
   </head>
   <body>
@@ -11,7 +12,6 @@
       <h3 name="home-steps-h3">2. Write down the solution steps</h3>
       <h3 name="home-steps-h3">3. Practice through retreival</h3>
     </section>
-    <a href = "{{ url_for('demo') }}"><button id="home-demo-button">DEMO</button></a>
     <section id="home-registration">
       <h3 id="home-question-h3">Ready to go?</h3>
       <a href = "{{ url_for('login') }}"><button id="home-login-button">log in</button></a>

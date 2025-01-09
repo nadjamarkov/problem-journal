@@ -50,15 +50,15 @@ class Record_form(FlaskForm):
   problem_title = StringField(validators = [InputRequired(), Length(min=3, max=50)], render_kw={"placeholder":"Problem title"})
   problem_text = StringField(validators = [InputRequired()], render_kw={"placeholder":"Problem text"})
   # select problem type out of the given options
-  problem_type = SelectField("Problem type", choices=[('Algebra','Algebra')])
+  problem_type = SelectField("Problem type", choices=[('Algebra','Algebra'),('RegEx','RegEx')])
   # write out the define step of the problem
-  problem_define = StringField(validators = [InputRequired()], render_kw={"placeholder":"Step 1: define"})
+  problem_define = SelectField("Step 1: define", choices=[('Expression','Expression'),('Equation','Equation'),('Number','Number'),('Text','Text')])
   problem_encode = StringField(validators = [InputRequired()], render_kw={"placeholder":"Step 2: encode"})
   problem_solution = StringField(validators = [InputRequired()], render_kw={"placeholder":"Solution"})
   # choose folder from a list of already existing  ones
-  old_folder = SelectField("Choose folder", choices=[])
+  old_folder = SelectField("Choose a problem subtype", choices=[])
   # or create a new folder
-  new_folder = StringField(render_kw={"placeholder":"Or create a new folder"})
+  new_folder = StringField(render_kw={"placeholder":"Or create a new problem subtype"})
   
   # submit the form
   submit = SubmitField("Add problem")
